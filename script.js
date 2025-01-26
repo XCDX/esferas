@@ -17,6 +17,10 @@ const collisionDampingValue = document.getElementById('collisionDampingValue');
 const bounceThresholdValue = document.getElementById('bounceThresholdValue');
 const maxRadiusValue = document.getElementById('maxRadiusValue');
 
+// Slider de FPS
+const fpsSlider = document.getElementById('fpsSlider');
+const fpsValue = document.getElementById('fpsValue');
+
 // Checkbox para activar/desactivar modo debug
 const debugCheckbox = document.getElementById('debugCheckbox');
 const debugControls = document.getElementById('debugControls');
@@ -28,6 +32,7 @@ let wallFriction = parseFloat(wallFrictionSlider.value);
 let collisionDamping = parseFloat(collisionDampingSlider.value);
 let bounceThreshold = parseFloat(bounceThresholdSlider.value);
 let maxRadius = parseFloat(maxRadiusSlider.value);
+let fps = parseFloat(fpsSlider.value);
 
 // Variables de control
 let debugMode = false;
@@ -63,7 +68,14 @@ maxRadiusSlider.addEventListener('input', () => {
     maxRadius = parseFloat(maxRadiusSlider.value);
     maxRadiusValue.textContent = maxRadiusSlider.value;
 });
+fpsSlider.addEventListener('input', () => {
+  fps = parseInt(fpsSlider.value);
+  fpsValue.textContent = fpsSlider.value;
+  interval = 1000 / fps;
+});
 
+let lastTime = 0;
+let interval = 1000 / fps;
 let spheres = [];
 
 // Mapa de colores según el tamaño de la esfera
@@ -104,11 +116,11 @@ class Sphere {
         }
     }
 
-    update() {
-        this.dy += gravity;
-        this.x += this.dx;
+    update(deltaTime) {
+        this.dy += gravity * deltaTime;
+        this.x += this.dx * deltaTime;
 
-        if (this.y + this.radius + this.dy > canvas.height) {
+        if (this.y + this.radius + this.dy * deltaTime > canvas.height) {
             this.y = canvas.height - this.radius;
             this.dy *= -friction;
 
@@ -116,7 +128,7 @@ class Sphere {
                 this.dy = 0;
             }
         } else {
-            this.y += this.dy;
+            this.y += this.dy * deltaTime;
         }
 
         if (this.x - this.radius <= 0) {
@@ -194,10 +206,10 @@ function getColorForSize(size) {
 }
 
 // Actualizar esferas y manejarlas
-function updateSpheres() {
+function updateSpheres(deltaTime) {
     for (let i = 0; i < spheres.length; i++) {
         let sphere = spheres[i];
-        sphere.update();
+        sphere.update(deltaTime);
         sphere.draw();
 
         for (let j = i + 1; j < spheres.length; j++) {
@@ -225,11 +237,14 @@ canvas.addEventListener('click', (event) => {
 
 
 // Animar el canvas
-function animate() {
+function animate(time) {
+    const deltaTime = (time - lastTime) / interval;
+    lastTime = time;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpiar el canvas
-    updateSpheres(); // Actualizar y dibujar esferas
+    updateSpheres(deltaTime); // Actualizar y dibujar esferas
     requestAnimationFrame(animate); // Continuar la animación
 }
 
 // Iniciar la animación
-animate();
+requestAnimationFrame(animate);
