@@ -1,0 +1,27 @@
+body {
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    background-color: #aaa;
+}
+
+canvas {
+    border: 1px solid black;
+}
+
+.controls {
+    margin-left: 20px;
+}
+
+.control {
+    margin-bottom: 10px;
+}
+
+.label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.hidden {
+    display: none;
+}
